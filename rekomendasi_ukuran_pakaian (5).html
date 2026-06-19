@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atelier Ukur</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: #F5F0E8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    color: #2C1A0E;
+  }
+
+  .card {
+    background: #FFFDF7;
+    border-radius: 4px;
+    box-shadow: 0 2px 16px rgba(80,40,10,0.10);
+    border-top: 4px solid #8B3A2A;
+    width: 100%;
+    max-width: 600px;
+    padding: 32px 28px 28px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: clamp(1rem, 4vw, 1.35rem);
+    font-weight: 700;
+    color: #2C1A0E;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 2px solid #D4C4A8;
+    margin: 14px 0 22px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: #6B4C35;
+    margin-bottom: 6px;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #D4C4A8;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #2C1A0E;
+    background: #FAF6EE;
+    transition: border-color 0.2s;
+    appearance: auto;
+    -webkit-appearance: auto;
+  }
+
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: #8B3A2A;
+    background: #fff;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.2px;
+  }
+
+  button:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: #8B3A2A;
+    color: #fff;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+
+  .btn-reset {
+    background: #e74c3c;
+    color: #fff;
+  }
+
+  .btn-reset:hover { opacity: 0.88; }
+
+  .result-box {
+    margin-top: 24px;
+    background: #FAF6EE;
+    border: 1.5px solid #D4C4A8;
+    border-radius: 4px;
+    padding: 20px 18px 14px;
+    display: none;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.93rem;
+    color: #333;
+    line-height: 1.7;
+  }
+
+  .result-box.show { display: block; }
+
+  .result-title {
+    text-align: center;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2C1A0E;
+    margin-bottom: 2px;
+  }
+
+  .result-garis {
+    color: #D4C4A8;
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .result-label { font-weight: 700; color: #6B4C35; }
+
+  .result-section-title {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-weight: 700;
+    font-size: 0.97rem;
+    color: #2C1A0E;
+    margin: 8px 0 4px;
+  }
+
+  .result-ukuran {
+    display: block;
+    text-align: center;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #8B3A2A;
+    background: #F5EDE6;
+    border-radius: 4px;
+    padding: 8px 0;
+    margin: 6px 0 14px;
+    letter-spacing: 1px;
+  }
+
+  .result-footer {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 0.82rem;
+    color: #A08060;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  .error-msg {
+    background: #fdecea;
+    color: #c0392b;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-top: 14px;
+    font-size: 0.93rem;
+    display: none;
+  }
+
+  .error-msg.show { display: block; }
+
+
+
+
+  /* ── Tab Navigation ── */
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    margin-bottom: 22px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1.5px solid #D4C4A8;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 11px 6px;
+    border: none;
+    background: #F5F0E8;
+    color: #A08060;
+    font-size: clamp(0.72rem, 2.6vw, 0.88rem);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    letter-spacing: 0.2px;
+  }
+  .tab-btn:not(:last-child) { border-right: 1.5px solid #D4C4A8; }
+  .tab-btn.active {
+    background: #8B3A2A;
+    color: #fff;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Panduan Accordion ── */
+  .panduan-intro {
+    font-size: 0.88rem;
+    color: #6B4C35;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+  .panduan-group-title {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #A08060;
+    margin: 22px 0 10px;
+  }
+  .panduan-group-title:first-of-type { margin-top: 0; }
+  .acc-item {
+    border: 1.5px solid #D4C4A8;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background: #FAF6EE;
+    overflow: hidden;
+  }
+  .acc-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: #2C1A0E;
+  }
+  .acc-header:hover { background: #F5EDE6; }
+  .acc-icon { font-size: 1.05rem; flex-shrink: 0; }
+  .acc-title { flex: 1; }
+  .acc-chevron {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: #8B3A2A;
+    transition: transform 0.2s ease;
+  }
+  .acc-item.open .acc-chevron { transform: rotate(180deg); }
+  .acc-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .acc-item.open .acc-body { max-height: 600px; }
+  .acc-body-inner {
+    padding: 0 16px 16px 40px;
+    font-size: 0.87rem;
+    color: #4A3825;
+    line-height: 1.65;
+  }
+  .acc-body-inner p { margin-bottom: 8px; }
+  .acc-body-inner p:last-child { margin-bottom: 0; }
+  .acc-body-inner ul {
+    margin: 6px 0 8px 18px;
+  }
+  .acc-body-inner li { margin-bottom: 4px; }
+  .acc-tombol {
+    font-weight: 700;
+    color: #8B3A2A;
+  }
+
+  /* ── Outfit Cards ── */
+  .outfit-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .outfit-controls select {
+    flex: 1;
+    min-width: 120px;
+  }
+  .outfit-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .style-btn {
+    flex: 1;
+    min-width: 90px;
+    padding: 9px 6px;
+    border: 2px solid #D4C4A8;
+    border-radius: 4px;
+    background: #FAF6EE;
+    color: #6B4C35;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+    text-align: center;
+  }
+  .style-btn.active {
+    border-color: #8B3A2A;
+    background: #8B3A2A;
+    color: #fff;
+  }
+  .style-btn:hover:not(.active) { border-color: #8B3A2A; background: #F5EDE6; }
+
+  .outfit-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .outfit-item-card {
+    background: #FAF6EE;
+    border: 1.5px solid #D4C4A8;
+    border-radius: 4px;
+    padding: 13px 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .outfit-item-card.optional {
+    border-style: dashed;
+    opacity: 0.85;
+  }
+  .outfit-icon {
+    font-size: 1.6rem;
+    min-width: 36px;
+    text-align: center;
+    margin-top: 2px;
+  }
+  .outfit-item-body { flex: 1; }
+  .outfit-item-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #8B3A2A;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 2px;
+  }
+  .outfit-item-name {
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #2C1A0E;
+    margin-bottom: 4px;
+  }
+  .outfit-item-detail {
+    font-size: 0.80rem;
+    color: #A08060;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .color-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .outfit-optional-tag {
+    font-size: 0.70rem;
+    background: #FEF3CD;
+    color: #856404;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .outfit-vibe {
+    background: linear-gradient(90deg, #F5EDE6, #F5F0E8);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    color: #2C1A0E;
+    line-height: 1.6;
+  }
+  .outfit-vibe-label {
+    font-weight: 700;
+    color: #8B3A2A;
+    font-size: 0.80rem;
+    margin-bottom: 3px;
+  }
+  .outfit-result-title {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2C1A0E;
+    margin-bottom: 14px;
+  }
+  .no-result-msg {
+    text-align: center;
+    color: #A08060;
+    font-size: 0.90rem;
+    padding: 24px 0;
+  }
+  .outfit-section-divider {
+    border: none;
+    border-top: 1.5px dashed #D4C4A8;
+    margin: 6px 0 14px;
+  }
+  /* Undertone selector */
+  .undertone-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .undertone-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: 2.5px solid #D4C4A8;
+    border-radius: 4px;
+    padding: 8px 12px;
+    background: #FAF6EE;
+    font-size: 0.82rem;
+    color: #6B4C35;
+    transition: border-color 0.2s, background 0.2s;
+    flex: 1;
+    min-width: 130px;
+    text-align: left;
+  }
+  .undertone-btn:hover { border-color: #8B3A2A; background: #fff; }
+  .undertone-btn.selected { border-color: #8B3A2A; background: #F5EDE6; }
+  .undertone-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.10);
+    flex-shrink: 0;
+  }
+  .ut-info { line-height: 1.4; }
+  .undertone-hint {
+    margin-top: 8px;
+    font-size: 0.80rem;
+    color: #8B3A2A;
+    font-style: italic;
+    min-height: 16px;
+    padding-left: 2px;
+  }
+  /* Bahan finish badge */
+  .finish-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .finish-glossy { background:#FEF3CD; color:#856404; }
+  .finish-matte  { background:#E2E8F0; color:#374151; }
+  .finish-tekstur{ background:#E8F5E9; color:#1B5E20; }
+  .finish-semi   { background:#F5EDE6; color:#8B3A2A; }
+
+  /* Tekstur material swatch */
+  .tekstur-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #D4C4A8;
+  }
+  .tekstur-swatch {
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+  .tekstur-info { line-height: 1.5; }
+  .tekstur-desc {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 0.78rem;
+    color: #A08060;
+    margin-top: 2px;
+  }
+  .warna-card {
+    background: #FAF6EE;
+    border: 1px solid #D4C4A8;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .warna-card-title {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #2C1A0E;
+    margin-bottom: 6px;
+  }
+  .warna-card-note {
+    font-size: 0.77rem;
+    color: #A08060;
+    font-style: italic;
+    margin-top: 4px;
+  }
+  /* Skin tone selector */
+  .skin-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .skin-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    border: 2.5px solid transparent;
+    border-radius: 4px;
+    padding: 6px 8px;
+    background: none;
+    font-size: 0.75rem;
+    color: #6B4C35;
+    font-weight: 600;
+    transition: border-color 0.2s, background 0.2s;
+    flex: 1;
+    min-width: 60px;
+  }
+  .skin-btn:active { transform: scale(0.96); }
+  .skin-btn.selected {
+    border-color: #8B3A2A;
+    background: #F5EDE6;
+  }
+  .skin-swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.10);
+    display: block;
+  }
+  .warna-chip {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.12);
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+  .warna-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 3px 0;
+  }
+  .warna-label-group {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    font-size: 0.85rem;
+    color: #6B4C35;
+    font-weight: 600;
+    margin: 6px 0 2px;
+  }
+  .warna-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #F5F0E8;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 0.80rem;
+    color: #2C1A0E;
+    margin: 2px 2px;
+    border: 1px solid #D4C4A8;
+  }
+  @media (max-width: 400px) {
+    .card { padding: 20px 10px 18px; }
+    .btn-row { flex-direction: column; }
+    button { min-width: unset; }
+  }
+
+  .custom-select { position: relative; width: 100%; user-select: none; }
+  .cs-selected {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #D4C4A8;
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #2C1A0E;
+    background: #FAF6EE;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .cs-selected:hover { border-color: #8B3A2A; background: #fff; }
+  .cs-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #8B3A2A;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+  .cs-arrow.open { transform: translateY(-50%) rotate(180deg); }
+  .cs-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1.5px solid #D4C4A8;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    z-index: 100;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .cs-options.open { display: block; }
+  .cs-group-label {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #8B3A2A;
+    padding: 8px 0 4px;
+    letter-spacing: 1px;
+    background: #F5F0E8;
+    border-top: 1px solid #D4C4A8;
+  }
+  .cs-group-label:first-child { border-top: none; border-radius: 8px 8px 0 0; }
+  .cs-item {
+    text-align: center;
+    padding: 9px 14px;
+    font-size: 0.97rem;
+    color: #2C1A0E;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .cs-item:hover { background: #F5EDE6; color: #8B3A2A; }
+  .cs-item.active { background: #8B3A2A; color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <p style="text-align:center;font-size:0.78rem;letter-spacing:3px;color:#8B3A2A;text-transform:uppercase;margin-bottom:6px;font-weight:600;font-family:'Inter',sans-serif;">Temukan ukuran sempurnamu</p><h1 style="font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.4rem,5vw,2rem);color:#2C1A0E;text-align:center;letter-spacing:1px;margin-bottom:4px;">Atelier Ukur</h1>
+  <hr class="divider">
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('tab-ukuran', this)">📏 Ukuran & Warna</button>
+    <button class="tab-btn" onclick="switchTab('tab-outfit', this)">👗 Kombinasi Outfit</button>
+    <button class="tab-btn" onclick="switchTab('tab-panduan', this)">📖 Panduan</button>
+  </div>
+
+  <!-- TAB 1: Ukuran & Warna -->
+  <div id="tab-ukuran" class="tab-panel active">
+
+  <div class="form-group">
+    <label for="barang">Pilih Barang</label>
+    <select id="barang" onchange="updateMaterial(); updateInputs();">
+      <option value="Baju">Baju</option>
+      <option value="Celana">Celana</option>
+      <option value="Topi">Topi</option>
+      <option value="Sepatu">Sepatu</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="gender">Jenis Kelamin</label>
+    <select id="gender" onchange="updateMaterial()">
+      <option value="Pria">Pria</option>
+      <option value="Wanita">Wanita</option>
+    </select>
+  </div>
+
+  <div class="form-group" id="input-tinggi">
+    <label for="tinggi">Tinggi Badan (cm)</label>
+    <input type="number" id="tinggi" placeholder="Contoh: 170" min="100" max="250" step="0.1">
+  </div>
+
+  <div class="form-group" id="input-berat">
+    <label for="berat">Berat Badan (kg)</label>
+    <input type="number" id="berat" placeholder="Contoh: 65" min="20" max="200" step="0.1">
+  </div>
+
+
+  <div class="form-group" id="input-kulit" style="display:none">
+    <label>Warna Kulit</label>
+    <div class="skin-options" id="skin-options">
+      <button type="button" class="skin-btn" onclick="selectSkin('cerah', this)">
+        <span class="skin-swatch" style="background:#FDDBB4;"></span>Cerah
+      </button>
+      <button type="button" class="skin-btn" onclick="selectSkin('medium', this)">
+        <span class="skin-swatch" style="background:#D4956A;"></span>Medium
+      </button>
+      <button type="button" class="skin-btn" onclick="selectSkin('sawo', this)">
+        <span class="skin-swatch" style="background:#A0622A;"></span>Sawo Matang
+      </button>
+      <button type="button" class="skin-btn" onclick="selectSkin('gelap', this)">
+        <span class="skin-swatch" style="background:#5C3317;"></span>Gelap
+      </button>
+    </div>
+  </div>
+
+  <div class="form-group" id="input-undertone" style="display:none">
+    <label>Undertone Kulit <span style="font-weight:400;color:#A08060;font-size:0.82rem;">(nuansa di balik warna kulit)</span></label>
+    <div class="undertone-options" id="undertone-options">
+      <button type="button" class="undertone-btn" onclick="selectUndertone('warm', this)">
+        <span class="undertone-swatch" style="background:linear-gradient(135deg,#E8A87C,#D4A057);"></span>
+        <span class="ut-info"><strong>Warm</strong><br><small>kemerahan / keemasan</small></span>
+      </button>
+      <button type="button" class="undertone-btn" onclick="selectUndertone('cool', this)">
+        <span class="undertone-swatch" style="background:linear-gradient(135deg,#B0A8D8,#8C89C4);"></span>
+        <span class="ut-info"><strong>Cool</strong><br><small>kebiruan / keunguan</small></span>
+      </button>
+      <button type="button" class="undertone-btn" onclick="selectUndertone('neutral', this)">
+        <span class="undertone-swatch" style="background:linear-gradient(135deg,#C8B89A,#A89880);"></span>
+        <span class="ut-info"><strong>Neutral</strong><br><small>campuran keduanya</small></span>
+      </button>
+    </div>
+    <div class="undertone-hint" id="undertone-hint"></div>
+  </div>
+
+  <div class="form-group" id="input-lingkar" style="display:none">
+    <label for="lingkar">Lingkar Kepala (cm)</label>
+    <input type="number" id="lingkar" placeholder="Contoh: 56" min="40" max="80" step="0.1">
+  </div>
+
+  <div class="form-group" id="input-kaki" style="display:none">
+    <label for="kaki">Panjang Kaki (cm)</label>
+    <input type="number" id="kaki" placeholder="Contoh: 26" min="15" max="35" step="0.5">
+  </div>
+
+  <div class="form-group">
+    <label>Material</label>
+    <div class="custom-select" id="custom-material">
+      <div class="cs-selected" id="cs-selected" onclick="toggleDropdown()">
+        <span id="cs-label">Pilih Material</span>
+        <span class="cs-arrow">&#8964;</span>
+      </div>
+      <div class="cs-options" id="cs-options"></div>
+    </div>
+  </div>
+
+  <div id="error-msg" class="error-msg">⚠️ Harap isi data dengan benar!</div>
+
+  <div class="btn-row">
+    <button class="btn-primary" onclick="tampilkanRekomendasi()">✨ Tampilkan Rekomendasi</button>
+    <button class="btn-reset" onclick="resetForm()">↺ Reset</button>
+  </div>
+
+  <div id="result-box" class="result-box"></div>
+  </div><!-- /tab-ukuran -->
+
+  <!-- TAB 2: Kombinasi Outfit -->
+  <div id="tab-outfit" class="tab-panel">
+
+    <div class="outfit-controls">
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:130px;">
+        <label for="outfit-gender">Jenis Kelamin</label>
+        <select id="outfit-gender">
+          <option value="Pria">Pria</option>
+          <option value="Wanita">Wanita</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;flex:1;min-width:130px;">
+        <label for="outfit-situasi">Situasi</label>
+        <select id="outfit-situasi">
+          <option value="pantai">🏖️ Pantai / Liburan</option>
+          <option value="olahraga">🏃 Olahraga / Gym</option>
+          <option value="formal">💼 Formal / Kantor</option>
+          <option value="kondangan">🎉 Kondangan / Semi-formal</option>
+          <option value="kasual">👕 Kasual Harian</option>
+          <option value="outdoor">🏕️ Outdoor / Hiking</option>
+        </select>
+      </div>
+    </div>
+
+    <label style="display:block;font-size:0.88rem;font-weight:600;color:#6B4C35;margin-bottom:8px;">Gaya</label>
+    <div class="outfit-btn-row">
+      <button class="style-btn active" onclick="selectStyle('klasik', this)">🎯 Safe / Klasik</button>
+      <button class="style-btn" onclick="selectStyle('trendi', this)">✨ Trendi / Modern</button>
+      <button class="style-btn" onclick="selectStyle('minimalis', this)">⬜ Minimalis</button>
+    </div>
+
+    <div class="btn-row" style="margin-top:0;margin-bottom:20px;">
+      <button class="btn-primary" onclick="tampilkanOutfit()">👗 Tampilkan Kombinasi</button>
+      <button class="btn-reset" onclick="resetOutfit()">↺ Reset</button>
+    </div>
+
+    <div id="outfit-result"></div>
+
+  </div><!-- /tab-outfit -->
+
+  <!-- TAB 3: Panduan -->
+  <div id="tab-panduan" class="tab-panel">
+
+    <p class="panduan-intro">Bingung mulai dari mana? Ketuk salah satu judul di bawah untuk melihat cara pakainya. 👇</p>
+
+    <div class="panduan-group-title">📏 Tab Ukuran & Warna</div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">1️⃣</span>
+        <span class="acc-title">Isi data dasar</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>Pilih dulu <strong>Jenis Barang</strong> (Baju, Celana, Topi, atau Sepatu) dan <strong>Jenis Kelamin</strong>. Kolom isian di bawahnya akan otomatis berubah menyesuaikan barang yang dipilih:</p>
+        <ul>
+          <li><strong>Baju &amp; Celana</strong> → isi Tinggi Badan dan Berat Badan</li>
+          <li><strong>Topi</strong> → isi Lingkar Kepala</li>
+          <li><strong>Sepatu</strong> → isi Panjang Kaki</li>
+        </ul>
+        <p>Semua satuan dalam <strong>cm</strong> (kilogram untuk berat badan).</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">2️⃣</span>
+        <span class="acc-title">Pilih warna kulit & undertone (khusus Baju)</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>Saat memilih barang <strong>Baju</strong>, dua pertanyaan tambahan akan muncul:</p>
+        <ul>
+          <li><strong>Warna Kulit</strong> — pilih yang paling mendekati warna kulitmu (Cerah, Medium, Sawo Matang, Gelap).</li>
+          <li><strong>Undertone Kulit</strong> — nuansa di balik warna kulit. Warm cenderung kemerahan/keemasan, Cool cenderung kebiruan/keunguan, Neutral campuran keduanya. Belum yakin undertone-mu? Lihat warna pembuluh darah di pergelangan tangan di bawah cahaya alami sebagai patokan kasar.</li>
+        </ul>
+        <p>Mengisi keduanya akan memunculkan rekomendasi warna pakaian yang cocok dan yang sebaiknya dihindari.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">3️⃣</span>
+        <span class="acc-title">Pilih Material</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>Klik dropdown <strong>Material</strong> untuk memilih bahan yang kamu inginkan. Tiap material punya karakteristik berbeda (contoh: menyerap keringat, jatuh kainnya, daya pantul cahaya), yang akan ditampilkan di hasil rekomendasi.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">🔘</span>
+        <span class="acc-title">Fungsi tombol</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p><span class="acc-tombol">✨ Tampilkan Rekomendasi</span> — menghitung dan menampilkan ukuran yang disarankan, beserta detail material dan (jika berlaku) rekomendasi warna. Jika ada kolom wajib yang kosong atau tidak valid, akan muncul pesan peringatan dan hasil tidak ditampilkan.</p>
+        <p><span class="acc-tombol">↺ Reset</span> — mengosongkan semua isian dan hasil, mengembalikan form ke kondisi awal supaya kamu bisa mulai dari nol.</p>
+      </div></div>
+    </div>
+
+    <div class="panduan-group-title">👗 Tab Kombinasi Outfit</div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">1️⃣</span>
+        <span class="acc-title">Atur Jenis Kelamin & Situasi</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>Pilih <strong>Jenis Kelamin</strong>, lalu pilih <strong>Situasi</strong> acara atau aktivitasnya — misalnya Pantai/Liburan, Olahraga/Gym, Formal/Kantor, Kondangan, Kasual Harian, atau Outdoor/Hiking. Pilihan ini menentukan jenis outfit yang akan direkomendasikan.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">2️⃣</span>
+        <span class="acc-title">Pilih Gaya</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>Tentukan nuansa outfit yang kamu mau lewat tiga tombol gaya:</p>
+        <ul>
+          <li><strong>🎯 Safe / Klasik</strong> — pilihan aman, timeless, tidak pernah salah.</li>
+          <li><strong>✨ Trendi / Modern</strong> — mengikuti tren terkini, lebih berani.</li>
+          <li><strong>⬜ Minimalis</strong> — simpel, clean, warna monokrom.</li>
+        </ul>
+        <p>Hanya satu gaya yang bisa aktif dalam satu waktu — tombol yang dipilih akan tersorot warna gelap.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">🔘</span>
+        <span class="acc-title">Fungsi tombol</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p><span class="acc-tombol">👗 Tampilkan Kombinasi</span> — menyusun rekomendasi outfit lengkap (baju, celana, sepatu, dan topi) sesuai gender, situasi, dan gaya yang sudah dipilih, lengkap dengan nama item, warna, dan bahan untuk masing-masing.</p>
+        <p><span class="acc-tombol">↺ Reset</span> — mengembalikan semua pilihan ke kondisi awal (Pria, Pantai/Liburan, Safe/Klasik) dan mengosongkan hasil kombinasi yang sedang ditampilkan.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-header" onclick="toggleAcc(this)">
+        <span class="acc-icon">🏷️</span>
+        <span class="acc-title">Arti label "Opsional"</span>
+        <span class="acc-chevron">▾</span>
+      </button>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>Item dengan label <strong>Opsional</strong> (biasanya Topi) bukan keharusan untuk dipakai — boleh ditambahkan untuk melengkapi gaya, atau dilewati saja jika tidak diperlukan. Untuk beberapa situasi seperti Kondangan, topi bahkan ditandai "Tidak diperlukan" karena memang tidak umum dipakai.</p>
+      </div></div>
+    </div>
+
+  </div><!-- /tab-panduan -->
+
+</div>
+
+<script>
+const materialMap = {
+  "Baju_Pria":   ["Katun Combed", "Katun Carded", "Linen", "Bambu", "Wool", "Katun Primisima", "Polyester", "Spandex Blend", "Nylon Blend"],
+  "Baju_Wanita": ["Katun Combed", "Rayon", "Linen", "Bambu", "Katun Primisima", "Wool", "Satin", "Polyester", "Spandex Blend", "Nylon Blend"],
+  "Celana": ["Denim", "Katun", "Polyester"],
+  "Topi":   ["Katun", "Kanvas", "Polyester"],
+  "Sepatu": ["Kulit", "Kanvas", "Suede", "Karet", "Mesh"]
+};
+
+const materialKategori = {
+  "Baju_Pria": {
+    "Santai": ["Katun Combed", "Katun Carded", "Linen", "Bambu"],
+    "Formal": ["Wool", "Katun Primisima"],
+    "Olahraga": ["Polyester", "Spandex Blend", "Nylon Blend"]
+  },
+  "Baju_Wanita": {
+    "Santai": ["Katun Combed", "Rayon", "Linen", "Bambu"],
+    "Formal": ["Katun Primisima", "Wool", "Satin"],
+    "Olahraga": ["Polyester", "Spandex Blend", "Nylon Blend"]
+  }
+};
+
+const keunggulanMaterial = {
+  "katun":           "Nyaman, menyerap keringat, cocok untuk cuaca panas.",
+  "polyester":       "Ringan, cepat kering, dan tahan kusut.",
+  "denim":           "Kuat, tahan lama, cocok untuk aktivitas luar ruangan.",
+  "kulit":           "Awet, elegan, dan memberikan perlindungan yang baik.",
+  "wool":            "Hangat dan cocok untuk cuaca dingin.",
+  "kanvas":          "Kuat, fleksibel, dan memberikan tampilan kasual.",
+  "suede":           "Lembut, mewah, namun butuh perawatan ekstra.",
+  "karet":           "Tahan air, fleksibel, dan sangat mencengkeram.",
+  "mesh":            "Sangat berpori, ringan, memberikan sirkulasi udara maksimal.",
+  "katun combed":    "Sangat lembut, adem, menyerap keringat, nyaman untuk harian di cuaca tropis.",
+  "katun carded":    "Sedikit lebih kasar dari combed, lebih terjangkau, cocok untuk kaos distro.",
+  "linen":           "Serat alami, sangat ringan, sirkulasi udara terbaik, cocok untuk cuaca panas.",
+  "bambu":           "Sangat lembut, antibakteri alami, dan ramah lingkungan.",
+  "katun primisima": "Halus, sedikit kilap, sering dipakai untuk batik formal.",
+  "spandex blend":   "Elastis, mengikuti gerakan tubuh, cocok untuk kaos gym ketat.",
+  "nylon blend":     "Kuat, tahan gesekan, ringan, cocok untuk kaos lari premium.",
+  "rayon":           "Jatuh mengikuti tubuh, adem, cocok untuk dress dan blouse kasual.",
+  "satin":           "Mengkilap, halus, mewah, cocok untuk blouse atau pakaian formal.",
+  "katun primisima": "Halus, sedikit kilap, sering dipakai untuk batik formal."
+};
+
+const detailCelanaWanita = {
+  "26≤":      { pinggang: "60 - 65",   pinggul: "84 - 89",    paha: "48 - 51", panjang: "90 - 95" },
+  "27 - 28":  { pinggang: "66 - 70",   pinggul: "90 - 94",    paha: "52 - 54", panjang: "95 - 98" },
+  "29 - 30":  { pinggang: "71 - 75",   pinggul: "95 - 99",    paha: "55 - 57", panjang: "98 - 100" },
+  "31 - 32":  { pinggang: "76 - 80",   pinggul: "100 - 104",  paha: "58 - 60", panjang: "100 - 102" },
+  "33 - 34":  { pinggang: "81 - 85",   pinggul: "105 - 109",  paha: "61 - 63", panjang: "102 - 104" },
+  "35≥":      { pinggang: "86 - 106+", pinggul: "110 - 130+", paha: "64 - 75+", panjang: "102 - 107" }
+};
+
+
+let selectedSkin = "";
+let selectedUndertone = "";
+
+// Finish bahan: glossy = memantulkan cahaya, matte = menyerap, tekstur = kasar/bertekstur
+const bahanFinish = {
+  "Katun Combed":    { finish: "matte",   label: "Matte" },
+  "Katun Carded":    { finish: "matte",   label: "Matte" },
+  "Katun":           { finish: "matte",   label: "Matte" },
+  "Katun Primisima": { finish: "matte",   label: "Matte" },
+  "Linen":           { finish: "tekstur", label: "Tekstur" },
+  "Bambu":           { finish: "matte",   label: "Matte" },
+  "Wool":            { finish: "tekstur", label: "Tekstur" },
+  "Rayon":           { finish: "semi",    label: "Semi-Glossy" },
+  "Satin":           { finish: "glossy",  label: "Glossy" },
+  "Polyester":       { finish: "semi",    label: "Semi-Glossy" },
+  "Spandex Blend":   { finish: "semi",    label: "Semi-Glossy" },
+  "Nylon Blend":     { finish: "glossy",  label: "Semi-Glossy" },
+  "Denim":           { finish: "tekstur", label: "Tekstur" },
+  "Kanvas":          { finish: "tekstur", label: "Tekstur" },
+  "Kulit":           { finish: "semi",    label: "Semi-Glossy" },
+  "Suede":           { finish: "tekstur", label: "Tekstur" },
+  "Karet":           { finish: "glossy",  label: "Glossy" },
+  "Mesh":            { finish: "tekstur", label: "Tekstur" }
+};
+
+// Warna dasar alami tiap material — dipakai untuk swatch tekstur, independen dari
+// rekomendasi warna pakaian (yang berdasarkan skin tone/undertone)
+const materialWarnaDasar = {
+  "Katun Combed":    "#F5F3EE",
+  "Katun Carded":    "#EFEAE0",
+  "Katun":           "#F0ECE3",
+  "Katun Primisima": "#F2EEE4",
+  "Linen":           "#D9CBA3",
+  "Bambu":           "#F2EFE8",
+  "Wool":            "#C9BBA8",
+  "Rayon":           "#EDE6DA",
+  "Satin":           "#5C1A2E",
+  "Polyester":       "#8FA3B8",
+  "Spandex Blend":   "#3A4A5A",
+  "Nylon Blend":     "#1B3A6B",
+  "Denim":           "#3B5A78",
+  "Kanvas":          "#C7B89A",
+  "Kulit":           "#6B4226",
+  "Suede":           "#A9784F",
+  "Karet":           "#2A2A2A",
+  "Mesh":            "#E5E5E5"
+};
+
+// Deskripsi singkat per kategori finish bahan
+const teksturDesc = {
+  matte:   "Permukaan rata & menyerap cahaya, kesan natural.",
+  tekstur: "Berserat / sedikit kasar, kesan natural dan kasual.",
+  semi:    "Sedikit berkilau, jatuh halus saat dipakai.",
+  glossy:  "Mengkilap & memantulkan cahaya, kesan mewah."
+};
+
+// Helper: menggelapkan (percent negatif) atau mencerahkan (percent positif) warna hex
+function shadeColor(hex, percent) {
+  const num = parseInt(hex.replace("#", ""), 16);
+  let r = (num >> 16) + Math.round(2.55 * percent);
+  let g = ((num >> 8) & 0x00FF) + Math.round(2.55 * percent);
+  let b = (num & 0x0000FF) + Math.round(2.55 * percent);
+  r = Math.min(255, Math.max(0, r));
+  g = Math.min(255, Math.max(0, g));
+  b = Math.min(255, Math.max(0, b));
+  return "#" + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+}
+
+// Membuat swatch SVG kecil yang merepresentasikan tekstur bahan (matte/tekstur/semi/glossy)
+function renderTeksturSwatch(material) {
+  const info = bahanFinish[material] || { finish: "matte", label: "Matte" };
+  const base = materialWarnaDasar[material] || "#D8D8D8";
+  let svgInner = "";
+
+  if (info.finish === "tekstur") {
+    const line = shadeColor(base, -22);
+    let grid = "";
+    for (let i = 8; i <= 56; i += 8) {
+      grid += `<line x1="${i}" y1="0" x2="${i}" y2="64"/><line x1="0" y1="${i}" x2="64" y2="${i}"/>`;
+    }
+    svgInner = `<rect width="64" height="64" rx="8" fill="${base}"/><g stroke="${line}" stroke-width="1.2">${grid}</g>`;
+  } else if (info.finish === "semi") {
+    const band = shadeColor(base, 14);
+    svgInner = `<rect width="64" height="64" rx="8" fill="${base}"/><rect x="0" y="16" width="64" height="12" fill="${band}"/><rect x="0" y="40" width="64" height="12" fill="${band}"/>`;
+  } else if (info.finish === "glossy") {
+    const clipId = "tekstur-clip-" + material.replace(/[^a-zA-Z0-9]/g, "");
+    const stripe = shadeColor(base, 28);
+    svgInner = `<defs><clipPath id="${clipId}"><rect width="64" height="64" rx="8"/></clipPath></defs><rect width="64" height="64" rx="8" fill="${base}"/><g clip-path="url(#${clipId})"><polygon points="10,0 22,0 54,64 42,64" fill="${stripe}"/></g>`;
+  } else {
+    const border = shadeColor(base, -12);
+    svgInner = `<rect width="64" height="64" rx="8" fill="${base}" stroke="${border}" stroke-width="1"/>`;
+  }
+
+  return `
+    <div class="tekstur-row">
+      <svg class="tekstur-swatch" width="40" height="40" viewBox="0 0 64 64" role="img" aria-label="Swatch tekstur untuk ${material}: ${info.label}">${svgInner}</svg>
+      <div class="tekstur-info">
+        <span class="result-label">  • Tekstur Material : </span>${getFinishBadge(material)}<br>
+        <span class="tekstur-desc">${teksturDesc[info.finish] || ""}</span>
+      </div>
+    </div>`;
+}
+
+// Data warna per (warna kulit + undertone)
+// Setiap warna dilengkapi efek per finish bahan
+const rekomendasiWarna = {
+  "cerah_warm": {
+    label: "Cerah — Warm Undertone", season: "Spring / Autumn",
+    cocok: [
+      { nama: "Peach",         hex: "#FFCBA4", efek: { glossy: "Terlihat lembut & feminin", matte: "Hangat & natural", semi: "Segar dan muda", tekstur: "Kasual elegan" } },
+      { nama: "Kuning Mustard",hex: "#C8A600", efek: { glossy: "Mencolok & berani", matte: "Earth tone klasik", semi: "Energik", tekstur: "Bohemian chic" } },
+      { nama: "Terracotta",    hex: "#CC5500", efek: { glossy: "Bold & dramatis", matte: "Hangat & membumi", semi: "Stylish kasual", tekstur: "Rustic & autentik" } },
+      { nama: "Coral",         hex: "#FF6F61", efek: { glossy: "Cerah & playful", matte: "Segar santai", semi: "Trendi", tekstur: "Fun & kasual" } },
+      { nama: "Hijau Olive",   hex: "#6B7A2A", efek: { glossy: "Tak biasa & unik", matte: "Earthy & maskulin", semi: "Modern casual", tekstur: "Militer chic" } },
+      { nama: "Coklat Kayu",   hex: "#795548", efek: { glossy: "Elegan warm", matte: "Natural & netral", semi: "Smart casual", tekstur: "Rustic hangat" } }
+    ],
+    hindari: [
+      { nama: "Biru Dingin",   hex: "#8B3A2A", alasan: "Bertabrakan dengan undertone warm" },
+      { nama: "Fuchsia",       hex: "#C2185B", alasan: "Terlalu cool, membuat kulit tampak pucat" },
+      { nama: "Abu-abu Biru",  hex: "#607D8B", alasan: "Undertone cool mengurangi kehangatan kulit" }
+    ]
+  },
+  "cerah_cool": {
+    label: "Cerah — Cool Undertone", season: "Summer / Winter",
+    cocok: [
+      { nama: "Navy / Biru Tua",   hex: "#1B3A6B", efek: { glossy: "Tajam & profesional", matte: "Klasik & berwibawa", semi: "Smart casual", tekstur: "Nautical chic" } },
+      { nama: "Burgundy",          hex: "#800020", efek: { glossy: "Mewah & dramatis", matte: "Elegan formal", semi: "Bold casual", tekstur: "Vintage chic" } },
+      { nama: "Lavender",          hex: "#9B59B6", efek: { glossy: "Feminin & lembut", matte: "Dreamy & unik", semi: "Romantis modern", tekstur: "Artistik" } },
+      { nama: "Hitam",             hex: "#1a1a1a", efek: { glossy: "Tajam & mewah", matte: "Klasik timeless", semi: "Urban chic", tekstur: "Edgy casual" } },
+      { nama: "Biru Pastel",       hex: "#AED6F1", efek: { glossy: "Segar & anggun", matte: "Lembut & airy", semi: "Feminine casual", tekstur: "Beachy soft" } },
+      { nama: "Hijau Zamrud",      hex: "#2E8B57", efek: { glossy: "Mewah & mencolok", matte: "Bold natural", semi: "Segar modern", tekstur: "Earthy chic" } }
+    ],
+    hindari: [
+      { nama: "Oranye Terang",  hex: "#FF6600", alasan: "Terlalu warm, membuat kulit tampak kusam" },
+      { nama: "Kuning Mustard", hex: "#C8A600", alasan: "Warm tone kontras buruk dengan cool undertone" },
+      { nama: "Coklat Kayu",    hex: "#795548", alasan: "Warm earth tone memperparah kesan pucat" }
+    ]
+  },
+  "cerah_neutral": {
+    label: "Cerah — Neutral Undertone", season: "Spring / Summer",
+    cocok: [
+      { nama: "Putih Bersih",  hex: "#F5F5F5", efek: { glossy: "Fresh & bersih", matte: "Minimalis elegan", semi: "Clean modern", tekstur: "Sporty casual" } },
+      { nama: "Navy",          hex: "#1B3A6B", efek: { glossy: "Profesional & tajam", matte: "Klasik netral", semi: "Smart casual", tekstur: "Nautical" } },
+      { nama: "Blush Pink",    hex: "#F4A7B9", efek: { glossy: "Lembut & feminin", matte: "Romantis pastel", semi: "Sweet casual", tekstur: "Soft boho" } },
+      { nama: "Sage Green",    hex: "#8FAE8B", efek: { glossy: "Fresh & modern", matte: "Natural elegan", semi: "Earthy chic", tekstur: "Casual nature" } },
+      { nama: "Abu Muda",      hex: "#9E9E9E", efek: { glossy: "Sleek modern", matte: "Netral timeless", semi: "Urban casual", tekstur: "Smart casual" } },
+      { nama: "Dusty Rose",    hex: "#D4A5A5", efek: { glossy: "Romantis anggun", matte: "Vintage soft", semi: "Feminine modern", tekstur: "Boho chic" } }
+    ],
+    hindari: [
+      { nama: "Kuning Neon",  hex: "#FFFF00", alasan: "Terlalu kontras, menyilaukan" },
+      { nama: "Oranye Neon",  hex: "#FF4500", alasan: "Warna terlalu agresif untuk kulit cerah neutral" },
+      { nama: "Coklat Gelap", hex: "#3E2723", alasan: "Terlalu berat, menggelapkan penampilan" }
+    ]
+  },
+  "medium_warm": {
+    label: "Medium — Warm Undertone", season: "Autumn / Spring",
+    cocok: [
+      { nama: "Terracotta",    hex: "#CC5500", efek: { glossy: "Bold & dramatis", matte: "Earthy & kuat", semi: "Trendi hangat", tekstur: "Bohemian" } },
+      { nama: "Kuning Emas",   hex: "#DAA520", efek: { glossy: "Glamour & mewah", matte: "Hangat cerah", semi: "Festive casual", tekstur: "Boho gold" } },
+      { nama: "Olive Green",   hex: "#6B7A2A", efek: { glossy: "Unik & fashion-forward", matte: "Maskulin earthy", semi: "Smart casual", tekstur: "Military chic" } },
+      { nama: "Burnt Orange",  hex: "#CC4400", efek: { glossy: "Berani & mencolok", matte: "Warm & powerful", semi: "Urban energik", tekstur: "Rustic bold" } },
+      { nama: "Coklat Karamel",hex: "#A0522D", efek: { glossy: "Elegan hangat", matte: "Natural tonal", semi: "Casual chic", tekstur: "Rustic natural" } },
+      { nama: "Krem / Ivory",  hex: "#FAF0E6", efek: { glossy: "Bersih & anggun", matte: "Lembut netral", semi: "Smart casual", tekstur: "Soft casual" } }
+    ],
+    hindari: [
+      { nama: "Ungu Muda",    hex: "#CE93D8", alasan: "Cool tone memperlemah kehangatan kulit" },
+      { nama: "Abu-abu Biru", hex: "#607D8B", alasan: "Menggelapkan penampilan secara keseluruhan" },
+      { nama: "Hitam Pekat",  hex: "#0a0a0a", alasan: "Terlalu berat untuk kontras medium warm" }
+    ]
+  },
+  "medium_cool": {
+    label: "Medium — Cool Undertone", season: "Summer / Winter",
+    cocok: [
+      { nama: "Biru Muda",     hex: "#5B9BD5", efek: { glossy: "Segar & cerah", matte: "Airy & clean", semi: "Smart casual", tekstur: "Nautical casual" } },
+      { nama: "Putih",         hex: "#F8F8F8", efek: { glossy: "Tajam & bersih", matte: "Minimalis", semi: "Fresh modern", tekstur: "Sporty clean" } },
+      { nama: "Fuchsia",       hex: "#C2185B", efek: { glossy: "Berani & mewah", matte: "Bold feminine", semi: "Trendi pop", tekstur: "Playful edgy" } },
+      { nama: "Teal",          hex: "#008080", efek: { glossy: "Elegan & unik", matte: "Deep & cool", semi: "Modern chic", tekstur: "Artsy" } },
+      { nama: "Lilac",         hex: "#C8A2C8", efek: { glossy: "Feminin & dreamy", matte: "Soft pastel", semi: "Romantic casual", tekstur: "Soft boho" } },
+      { nama: "Abu-abu Medium",hex: "#757575", efek: { glossy: "Sleek urban", matte: "Netral elegan", semi: "Smart casual", tekstur: "Minimal chic" } }
+    ],
+    hindari: [
+      { nama: "Kuning Mustard",hex: "#C8A600", alasan: "Warm tone memperlemah undertone cool" },
+      { nama: "Coklat Kayu",   hex: "#795548", alasan: "Tonal terlalu mirip, kurang kontras" },
+      { nama: "Oranye Terang", hex: "#FF6600", alasan: "Warm tone bertabrakan dengan cool undertone" }
+    ]
+  },
+  "medium_neutral": {
+    label: "Medium — Neutral Undertone", season: "Autumn / Spring",
+    cocok: [
+      { nama: "Putih Off-white",hex: "#FAF0E6", efek: { glossy: "Lembut & anggun", matte: "Natural & clean", semi: "Fresh casual", tekstur: "Soft casual" } },
+      { nama: "Dusty Blue",    hex: "#7A99B8", efek: { glossy: "Elegan tenang", matte: "Calm & cool", semi: "Smart casual", tekstur: "Soft nautical" } },
+      { nama: "Sage Green",    hex: "#8FAE8B", efek: { glossy: "Segar & modern", matte: "Natural earthy", semi: "Earthy casual", tekstur: "Boho nature" } },
+      { nama: "Mauve",         hex: "#E8B4B8", efek: { glossy: "Feminine & soft", matte: "Vintage chic", semi: "Romantic casual", tekstur: "Soft boho" } },
+      { nama: "Camel / Tan",   hex: "#C19A6B", efek: { glossy: "Warm & elegan", matte: "Netral hangat", semi: "Smart casual", tekstur: "Rustic chic" } },
+      { nama: "Merah Bata",    hex: "#A93226", efek: { glossy: "Bold & kuat", matte: "Earthy dramatic", semi: "Urban bold", tekstur: "Rustic bold" } }
+    ],
+    hindari: [
+      { nama: "Kuning Neon",  hex: "#FFFF00", alasan: "Terlalu mencolok, tidak harmonis" },
+      { nama: "Pink Shocking",hex: "#FF1493", alasan: "Terlalu agresif untuk neutral medium" },
+      { nama: "Coklat Gelap", hex: "#3E2723", alasan: "Terlalu berat dan menggelapkan penampilan" }
+    ]
+  },
+  "sawo_warm": {
+    label: "Sawo Matang — Warm Undertone", season: "Autumn",
+    cocok: [
+      { nama: "Putih Bersih",  hex: "#F5F5F5", efek: { glossy: "Kontras tajam & bersih", matte: "Segar & kuat", semi: "Fresh modern", tekstur: "Sporty clean" } },
+      { nama: "Kuning Emas",   hex: "#DAA520", efek: { glossy: "Glamour & festive", matte: "Hangat cerah", semi: "Vibrant casual", tekstur: "Boho gold" } },
+      { nama: "Merah Cerah",   hex: "#D0021B", efek: { glossy: "Dramatis & powerful", matte: "Bold & kuat", semi: "Urban energik", tekstur: "Strong casual" } },
+      { nama: "Oranye Tembaga",hex: "#B87333", efek: { glossy: "Mewah hangat", matte: "Earthy tonal", semi: "Warm casual", tekstur: "Rustic warm" } },
+      { nama: "Hijau Kuning",  hex: "#9ACD32", efek: { glossy: "Playful & segar", matte: "Earthy vibrant", semi: "Fun casual", tekstur: "Nature casual" } },
+      { nama: "Krem Muda",     hex: "#FFF8DC", efek: { glossy: "Cerah kontras", matte: "Lembut natural", semi: "Clean casual", tekstur: "Soft casual" } }
+    ],
+    hindari: [
+      { nama: "Coklat Tua",    hex: "#5C3317", alasan: "Tonal terlalu mirip kulit, tidak ada kontras" },
+      { nama: "Khaki",         hex: "#C3B091", alasan: "Warna terlalu dekat dengan warna kulit" },
+      { nama: "Oranye Tanah",  hex: "#8B4513", alasan: "Menyatu dengan kulit, mengurangi definisi" }
+    ]
+  },
+  "sawo_cool": {
+    label: "Sawo Matang — Cool Undertone", season: "Winter",
+    cocok: [
+      { nama: "Putih Bersih",  hex: "#F5F5F5", efek: { glossy: "Tajam & bersih", matte: "Kuat & segar", semi: "Fresh clean", tekstur: "Sporty" } },
+      { nama: "Biru Elektrik", hex: "#0057E7", efek: { glossy: "Dramatis & striking", matte: "Bold & kuat", semi: "Urban modern", tekstur: "Edgy" } },
+      { nama: "Ungu Cerah",    hex: "#9B59B6", efek: { glossy: "Mewah & unik", matte: "Artistik bold", semi: "Modern dramatic", tekstur: "Artsy casual" } },
+      { nama: "Fuchsia",       hex: "#C2185B", efek: { glossy: "Berani & powerful", matte: "Bold pop", semi: "Vibrant trendi", tekstur: "Playful bold" } },
+      { nama: "Silver/Abu-abu",hex: "#9E9E9E", efek: { glossy: "Sleek & modern", matte: "Urban netral", semi: "Smart casual", tekstur: "Minimal chic" } },
+      { nama: "Hijau Zamrud",  hex: "#2E8B57", efek: { glossy: "Elegan kuat", matte: "Deep natural", semi: "Bold casual", tekstur: "Nature bold" } }
+    ],
+    hindari: [
+      { nama: "Coklat Kayu",   hex: "#795548", alasan: "Terlalu warm, menggelapkan penampilan" },
+      { nama: "Khaki Gelap",   hex: "#8B7355", alasan: "Tonal terlalu dekat dengan kulit" },
+      { nama: "Olive Gelap",   hex: "#3B3A0A", alasan: "Menyatu dengan kulit, hilang definisi" }
+    ]
+  },
+  "sawo_neutral": {
+    label: "Sawo Matang — Neutral Undertone", season: "Autumn / Winter",
+    cocok: [
+      { nama: "Putih",         hex: "#F8F8F8", efek: { glossy: "Kontras tajam", matte: "Segar & kuat", semi: "Fresh casual", tekstur: "Clean casual" } },
+      { nama: "Merah Cerah",   hex: "#D0021B", efek: { glossy: "Powerful & bold", matte: "Kuat & tegas", semi: "Urban energik", tekstur: "Strong casual" } },
+      { nama: "Kuning Cerah",  hex: "#FFD700", efek: { glossy: "Mencolok & ceria", matte: "Vibrant warm", semi: "Fun trendi", tekstur: "Boho vibrant" } },
+      { nama: "Teal",          hex: "#008080", efek: { glossy: "Elegan & unik", matte: "Cool deep", semi: "Modern casual", tekstur: "Artsy" } },
+      { nama: "Biru Langit",   hex: "#87CEEB", efek: { glossy: "Segar kontras tinggi", matte: "Airy & clean", semi: "Fresh casual", tekstur: "Casual clean" } },
+      { nama: "Ungu Lavender", hex: "#9B59B6", efek: { glossy: "Feminin & dramatic", matte: "Soft bold", semi: "Modern feminine", tekstur: "Artsy soft" } }
+    ],
+    hindari: [
+      { nama: "Coklat Medium", hex: "#795548", alasan: "Tonal terlalu dekat dengan kulit" },
+      { nama: "Khaki",         hex: "#C3B091", alasan: "Warna menyatu dengan kulit sawo" },
+      { nama: "Abu-abu Gelap", hex: "#444444", alasan: "Menggelapkan dan membuat kulit tampak kusam" }
+    ]
+  },
+  "gelap_warm": {
+    label: "Gelap — Warm Undertone", season: "Autumn",
+    cocok: [
+      { nama: "Putih Cerah",   hex: "#F8F8F8", efek: { glossy: "Kontras maksimal & striking", matte: "Kuat & tegas", semi: "Bold clean", tekstur: "Sporty bold" } },
+      { nama: "Kuning Cerah",  hex: "#FFD700", efek: { glossy: "Glamour & festive", matte: "Vibrant warm", semi: "Fun bold", tekstur: "Boho vibrant" } },
+      { nama: "Oranye Cerah",  hex: "#FF6600", efek: { glossy: "Dramatis & powerful", matte: "Warm bold", semi: "Urban energik", tekstur: "Strong casual" } },
+      { nama: "Kuning Lime",   hex: "#BFFF00", efek: { glossy: "Eye-catching & trendi", matte: "Vibrant nature", semi: "Sporty trendi", tekstur: "Athletic bold" } },
+      { nama: "Emas / Gold",   hex: "#FFD700", efek: { glossy: "Mewah & glamour", matte: "Regal warm", semi: "Festive chic", tekstur: "Luxe casual" } },
+      { nama: "Merah Terang",  hex: "#FF1A1A", efek: { glossy: "Berani & powerful", matte: "Strong bold", semi: "Urban fierce", tekstur: "Bold statement" } }
+    ],
+    hindari: [
+      { nama: "Coklat Gelap",  hex: "#3E1C00", alasan: "Tonal menyatu dengan kulit gelap" },
+      { nama: "Navy Sangat Gelap", hex: "#0A1045", alasan: "Terlalu gelap, tidak ada kontras" },
+      { nama: "Maroon Gelap",  hex: "#5C0A14", alasan: "Warna terlalu gelap, menyatu dengan kulit" }
+    ]
+  },
+  "gelap_cool": {
+    label: "Gelap — Cool Undertone", season: "Winter",
+    cocok: [
+      { nama: "Putih",         hex: "#F8F8F8", efek: { glossy: "Tajam & striking", matte: "Kuat & bersih", semi: "Bold clean", tekstur: "Clean bold" } },
+      { nama: "Biru Elektrik", hex: "#0057E7", efek: { glossy: "Dramatis & mencolok", matte: "Deep & kuat", semi: "Urban bold", tekstur: "Edgy bold" } },
+      { nama: "Hijau Lime",    hex: "#7FBA00", efek: { glossy: "Vibrant & eye-catching", matte: "Fresh bold", semi: "Sporty bold", tekstur: "Athletic chic" } },
+      { nama: "Silver",        hex: "#C0C0C0", efek: { glossy: "Futuristik & sleek", matte: "Cool netral", semi: "Modern chic", tekstur: "Urban minimal" } },
+      { nama: "Fuchsia",       hex: "#C2185B", efek: { glossy: "Powerful & dramatis", matte: "Bold pop", semi: "Fierce trendi", tekstur: "Bold playful" } },
+      { nama: "Ungu Tua",      hex: "#6A0DAD", efek: { glossy: "Mewah & regal", matte: "Deep royal", semi: "Dramatic casual", tekstur: "Luxe casual" } }
+    ],
+    hindari: [
+      { nama: "Coklat Tua",    hex: "#3E1C00", alasan: "Menyatu dengan kulit, tidak ada kontras" },
+      { nama: "Burgundy Tua",  hex: "#3D0000", alasan: "Terlalu gelap, kurang kontras" },
+      { nama: "Olive Gelap",   hex: "#3B3A0A", alasan: "Warna mati di atas kulit gelap cool" }
+    ]
+  },
+  "gelap_neutral": {
+    label: "Gelap — Neutral Undertone", season: "Winter / Autumn",
+    cocok: [
+      { nama: "Putih",         hex: "#F8F8F8", efek: { glossy: "Kontras maksimal", matte: "Tegas & kuat", semi: "Bold fresh", tekstur: "Strong casual" } },
+      { nama: "Merah Menyala", hex: "#FF1A1A", efek: { glossy: "Dramatic & powerful", matte: "Bold fierce", semi: "Urban energik", tekstur: "Bold statement" } },
+      { nama: "Kuning Cerah",  hex: "#FFD700", efek: { glossy: "Glamour & festive", matte: "Vibrant bold", semi: "Fun bold", tekstur: "Boho vibrant" } },
+      { nama: "Biru Cobalt",   hex: "#0047AB", efek: { glossy: "Elegan & striking", matte: "Deep classic", semi: "Smart bold", tekstur: "Classic bold" } },
+      { nama: "Oranye Terang", hex: "#FF6600", efek: { glossy: "Berani & dramatis", matte: "Warm bold", semi: "Urban fierce", tekstur: "Strong casual" } },
+      { nama: "Hijau Terang",  hex: "#00C853", efek: { glossy: "Fresh & eye-catching", matte: "Vibrant natural", semi: "Sporty bold", tekstur: "Nature bold" } }
+    ],
+    hindari: [
+      { nama: "Coklat Gelap",  hex: "#3E1C00", alasan: "Menyatu dengan kulit, tidak ada kontras" },
+      { nama: "Navy Gelap",    hex: "#0A1045", alasan: "Terlalu gelap untuk kulit gelap neutral" },
+      { nama: "Hijau Gelap",   hex: "#1B5E20", alasan: "Terlalu menyatu, kurang definisi" }
+    ]
+  }
+};
+
+const undertoneHints = {
+  warm:    "💡 Cek pergelangan tangan: urat berwarna hijau? Kemungkinan warm.",
+  cool:    "💡 Cek pergelangan tangan: urat berwarna biru/ungu? Kemungkinan cool.",
+  neutral: "💡 Urat pergelangan campuran hijau & biru? Kemungkinan neutral."
+};
+
+function selectSkin(val, el) {
+  selectedSkin = val;
+  document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("selected"));
+  el.classList.add("selected");
+  // show undertone selector
+  document.getElementById("input-undertone").style.display = "block";
+}
+
+function selectUndertone(val, el) {
+  selectedUndertone = val;
+  document.querySelectorAll(".undertone-btn").forEach(b => b.classList.remove("selected"));
+  el.classList.add("selected");
+  document.getElementById("undertone-hint").textContent = undertoneHints[val] || "";
+}
+
+function getFinishBadge(mat) {
+  const info = bahanFinish[mat];
+  if (!info) return "";
+  const clsMap = { glossy: "finish-glossy", matte: "finish-matte", tekstur: "finish-tekstur", semi: "finish-semi" };
+  const cls = clsMap[info.finish] || "finish-matte";
+  return `<span class="finish-badge ${cls}">${info.label}</span>`;
+}
+
+function getEfekBahan(efekObj, mat) {
+  const info = bahanFinish[mat];
+  if (!info || !efekObj) return "";
+  return efekObj[info.finish] || efekObj["matte"] || "";
+}
+
+function renderWarnaCards(list, mat, isHindari) {
+  return list.map(w => {
+    const efek = isHindari ? "" : getEfekBahan(w.efek, mat);
+    const keterangan = isHindari
+      ? `<div class="warna-card-note">⚠️ ${w.alasan || ""}</div>`
+      : (efek ? `<div class="warna-card-note">✨ Di bahan ini: <em>${efek}</em></div>` : "");
+    return `
+      <div class="warna-card">
+        <div class="warna-card-title">
+          <span class="warna-chip" style="background:${w.hex};width:20px;height:20px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:6px;border:1.5px solid rgba(0,0,0,0.12);"></span>
+          ${w.nama}
+        </div>
+        ${keterangan}
+      </div>`;
+  }).join("");
+}
+
+function renderWarnaChips(list) {
+  return list.map(w =>
+    `<span class="warna-tag"><span class="warna-chip" style="background:${w.hex};"></span>${w.nama}</span>`
+  ).join("");
+}
+
+let selectedMaterial = "";
+
+function updateInputs() {
+  const barang = document.getElementById("barang").value;
+  const showTinggiBerat = barang === "Baju" || barang === "Celana";
+  const showLingkar = barang === "Topi";
+  const showKaki = barang === "Sepatu";
+
+  document.getElementById("input-tinggi").style.display = showTinggiBerat ? "block" : "none";
+  document.getElementById("input-berat").style.display = showTinggiBerat ? "block" : "none";
+  document.getElementById("input-kulit").style.display = (barang === "Baju") ? "block" : "none";
+  document.getElementById("input-undertone").style.display = "none";
+  document.getElementById("input-lingkar").style.display = showLingkar ? "block" : "none";
+  document.getElementById("input-kaki").style.display = showKaki ? "block" : "none";
+
+  // clear values
+  document.getElementById("tinggi").value = "";
+  document.getElementById("berat").value = "";
+  document.getElementById("lingkar").value = "";
+  document.getElementById("kaki").value = "";
+  selectedSkin = "";
+  selectedUndertone = "";
+  document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("selected"));
+  document.querySelectorAll(".undertone-btn").forEach(b => b.classList.remove("selected"));
+  if(document.getElementById("undertone-hint")) document.getElementById("undertone-hint").textContent = "";
+  if(document.getElementById("input-undertone")) document.getElementById("input-undertone").style.display = "none";
+}
+
+function updateMaterial() {
+  updateInputs();
+  const barang = document.getElementById("barang").value;
+  const gender = document.getElementById("gender").value;
+  const opts = document.getElementById("cs-options");
+  opts.innerHTML = "";
+  selectedMaterial = "";
+  document.getElementById("cs-label").textContent = "Pilih Material";
+  document.querySelectorAll(".cs-item").forEach(i => i.classList.remove("active"));
+
+  if (barang === "Baju" && (gender === "Pria" || gender === "Wanita")) {
+    const kat = materialKategori["Baju_" + gender];
+    Object.entries(kat).forEach(([kategori, items]) => {
+      const grpEl = document.createElement("div");
+      grpEl.className = "cs-group-label";
+      grpEl.textContent = "── " + kategori + " ──";
+      opts.appendChild(grpEl);
+      items.forEach(m => {
+        const el = document.createElement("div");
+        el.className = "cs-item";
+        el.textContent = m;
+        el.onclick = () => selectMaterial(m, el);
+        opts.appendChild(el);
+      });
+    });
+    const firstItem = opts.querySelector(".cs-item");
+    if (firstItem) firstItem.click();
+  } else {
+    const key = (barang === "Baju") ? "Baju_" + gender : barang;
+    (materialMap[key] || materialMap[barang] || []).forEach(m => {
+      const el = document.createElement("div");
+      el.className = "cs-item";
+      el.textContent = m;
+      el.onclick = () => selectMaterial(m, el);
+      opts.appendChild(el);
+    });
+    const firstItem = opts.querySelector(".cs-item");
+    if (firstItem) firstItem.click();
+  }
+}
+
+function selectMaterial(val, el) {
+  selectedMaterial = val;
+  document.getElementById("cs-label").textContent = val;
+  document.querySelectorAll(".cs-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("cs-options").classList.remove("open");
+  document.querySelector(".cs-arrow").classList.remove("open");
+}
+
+function toggleDropdown() {
+  const opts = document.getElementById("cs-options");
+  const arrow = document.querySelector(".cs-arrow");
+  opts.classList.toggle("open");
+  arrow.classList.toggle("open");
+}
+
+document.addEventListener("click", function(e) {
+  if (!document.getElementById("custom-material").contains(e.target)) {
+    document.getElementById("cs-options").classList.remove("open");
+    document.querySelector(".cs-arrow").classList.remove("open");
+  }
+});
+
+function ukuranBajuPria(t, b) {
+  if (b < 65) {
+    if (t < 165) return "S";
+    if (t <= 175) return "M";
+    if (t <= 185) return "L";
+    return "XL";
+  } else if (b <= 75) {
+    if (t < 165) return "M";
+    if (t <= 185) return "L";
+    return "XL";
+  } else if (b <= 85) {
+    return t < 165 ? "L" : "XL";
+  } else if (b <= 92) {
+    return "XL";
+  }
+  return "XXL";
+}
+
+function ukuranBajuWanita(t, b) {
+  let base;
+  if (b < 45)      base = 0;
+  else if (b < 53) base = 1;
+  else if (b < 62) base = 2;
+  else if (b < 72) base = 3;
+  else if (b < 82) base = 4;
+  else             base = 5;
+
+  let modifier;
+  if (t < 152)      modifier = 1;
+  else if (t > 168) modifier = -1;
+  else              modifier = 0;
+
+  const idx = Math.max(0, Math.min(base + modifier, 5));
+  return ["XS", "S", "M", "L", "XL", "XXL"][idx];
+}
+
+function ukuranCelanaPria(b) {
+  if (b <= 47) return "27"; if (b <= 50) return "28"; if (b <= 52) return "29";
+  if (b <= 53) return "30"; if (b <= 56) return "31"; if (b <= 59) return "32";
+  if (b <= 62) return "33"; if (b <= 65) return "34"; if (b <= 68) return "35";
+  if (b <= 71) return "36"; if (b <= 73) return "37"; if (b <= 77) return "38";
+  return "40";
+}
+
+function ukuranCelanaWanita(b) {
+  if (b < 40) return "26≤";
+  if (b < 46) return "27 - 28";
+  if (b < 52) return "29 - 30";
+  if (b < 58) return "31 - 32";
+  if (b < 63) return "33 - 34";
+  return "35≥";
+}
+
+function ukuranTopi(lingkar) {
+  if (lingkar <= 53) return "XS";
+  if (lingkar <= 55) return "S";
+  if (lingkar <= 57) return "M";
+  if (lingkar <= 59) return "L";
+  if (lingkar <= 61) return "XL";
+  return "XXL";
+}
+
+function ukuranSepatu(gender, kaki) {
+  if (gender === "Pria") {
+    if (kaki <= 24.5) return "EU 39 / US 6.5 / UK 6";
+    if (kaki <= 25.0) return "EU 40 / US 7 / UK 6.5";
+    if (kaki <= 25.5) return "EU 41 / US 8 / UK 7.5";
+    if (kaki <= 26.5) return "EU 42 / US 8.5 / UK 8";
+    if (kaki <= 27.5) return "EU 43 / US 9.5 / UK 9";
+    if (kaki <= 28.0) return "EU 44 / US 10 / UK 9.5";
+    return "EU 45 / US 11 / UK 10.5";
+  } else {
+    if (kaki <= 22.0) return "EU 35 / US 5 / UK 3";
+    if (kaki <= 22.5) return "EU 36 / US 6 / UK 4";
+    if (kaki <= 23.5) return "EU 37 / US 6.5 / UK 4.5";
+    if (kaki <= 24.0) return "EU 38 / US 7.5 / UK 5.5";
+    if (kaki <= 24.5) return "EU 39 / US 8.5 / UK 6.5";
+    if (kaki <= 25.5) return "EU 40 / US 9 / UK 7";
+    return "EU 41 / US 10 / UK 8";
+  }
+}
+
+function getKeunggulan(mat) {
+  return keunggulanMaterial[mat.toLowerCase()] || "Material sesuai kebutuhan pengguna.";
+}
+
+function tampilkanRekomendasi() {
+  const barang   = document.getElementById("barang").value;
+  const gender   = document.getElementById("gender").value;
+  const tinggi   = parseFloat(document.getElementById("tinggi").value);
+  const berat    = parseFloat(document.getElementById("berat").value);
+  const lingkar  = parseFloat(document.getElementById("lingkar").value);
+  const kaki     = parseFloat(document.getElementById("kaki").value);
+  const material = selectedMaterial;
+
+  const errEl = document.getElementById("error-msg");
+  const resEl = document.getElementById("result-box");
+
+  // Validate based on barang
+  let inputValid = true;
+  if ((barang === "Baju" || barang === "Celana") && (isNaN(tinggi) || isNaN(berat) || tinggi <= 0 || berat <= 0)) inputValid = false;
+  if (barang === "Topi" && (isNaN(lingkar) || lingkar <= 0)) inputValid = false;
+  if (barang === "Sepatu" && (isNaN(kaki) || kaki <= 0)) inputValid = false;
+
+  if (!inputValid) {
+    const pesanError = {
+      "Baju":   "⚠️ Harap isi tinggi dan berat badan dengan benar!",
+      "Celana": "⚠️ Harap isi tinggi dan berat badan dengan benar!",
+      "Topi":   "⚠️ Harap isi lingkar kepala dengan benar!",
+      "Sepatu": "⚠️ Harap isi panjang kaki dengan benar!"
+    };
+    errEl.textContent = pesanError[barang] || "⚠️ Harap isi data dengan benar!";
+    errEl.classList.add("show");
+    resEl.classList.remove("show");
+    return;
+  }
+  errEl.classList.remove("show");
+
+  let ukuran = "Tidak diketahui";
+  if (barang === "Baju")   ukuran = gender === "Pria" ? ukuranBajuPria(tinggi, berat) : ukuranBajuWanita(tinggi, berat);
+  if (barang === "Celana") ukuran = gender === "Pria" ? ukuranCelanaPria(berat) : ukuranCelanaWanita(berat);
+  if (barang === "Topi")   ukuran = ukuranTopi(lingkar);
+  if (barang === "Sepatu") ukuran = ukuranSepatu(gender, kaki);
+
+  let html = `
+    <div class="result-title">✨ HASIL REKOMENDASI UKURAN ✨</div>
+    <div class="result-garis">${"─".repeat(42)}</div>
+    <div>
+      <span class="result-label">  • Jenis Barang     : </span>${barang}<br>
+      <span class="result-label">  • Jenis Kelamin    : </span>${gender}<br>
+      <span class="result-label">  • Profil Fisik     : </span>${
+        barang === "Topi" ? lingkar + " cm (lingkar kepala)" :
+        barang === "Sepatu" ? kaki + " cm (panjang kaki)" :
+        tinggi + " cm / " + berat + " kg"
+      }<br><br>
+      <div class="result-section-title">  REKOMENDASI UKURAN ANDA:</div>
+      <span class="result-ukuran">${ukuran}</span>
+      <span class="result-label">  • Material Pilihan : </span>${material}<br>
+      <span class="result-label">  • Karakteristik    : </span>${getKeunggulan(material)}<br>
+    </div>`;
+
+  if (barang === "Celana" && gender === "Wanita") {
+    const det = detailCelanaWanita[ukuran];
+    if (det) {
+      html += `
+      <br><div class="result-section-title">  DETAIL UKURAN JEANS:</div>
+      <span class="result-label">  • Lingkar Pinggang : </span>${det.pinggang} cm<br>
+      <span class="result-label">  • Lingkar Pinggul  : </span>${det.pinggul} cm<br>
+      <span class="result-label">  • Lingkar Paha     : </span>${det.paha} cm<br>
+      <span class="result-label">  • Panjang Celana   : </span>${det.panjang} cm<br>`;
+    }
+  }
+
+
+  if (barang === "Baju" && selectedSkin && selectedUndertone) {
+    const key = selectedSkin + "_" + selectedUndertone;
+    const rw = rekomendasiWarna[key];
+    if (rw) {
+      const finishInfo = bahanFinish[material];
+      const finishDesc = finishInfo ? ` — bahan <strong>${material}</strong> bersifat <strong>${finishInfo.label}</strong>` : "";
+      html += `
+        <br><div class="result-section-title">  🎨 REKOMENDASI WARNA PAKAIAN:</div>
+        <div style="font-family:'Segoe UI',Arial,sans-serif; font-size:0.83rem; color:#A08060; margin-bottom:2px;">
+          Profil kulit: <strong>${rw.label}</strong> &nbsp;|&nbsp; Season: <strong>${rw.season}</strong>
+        </div>
+        <div style="font-family:'Segoe UI',Arial,sans-serif; font-size:0.82rem; color:#8B3A2A; margin-bottom:10px;">
+          ${finishDesc ? "Rekomendasi warna disesuaikan dengan efek bahan pilihanmu" + finishDesc + "." : ""}
+        </div>
+        <div class="warna-label-group">  ✅ Warna yang Cocok:</div>
+        <div style="padding:0 4px 8px;">${renderWarnaCards(rw.cocok, material, false)}</div>
+        <div class="warna-label-group">  ⚠️ Warna yang Sebaiknya Dihindari:</div>
+        <div style="padding:0 4px 4px;">${renderWarnaCards(rw.hindari, material, true)}</div>`;
+    }
+  } else if (barang === "Baju" && selectedSkin && !selectedUndertone) {
+    html += `
+      <br><div style="background:#FEF3CD;border-radius:8px;padding:10px 14px;font-size:0.88rem;color:#856404;font-family:'Segoe UI',Arial,sans-serif;">
+        💡 Pilih <strong>undertone kulit</strong> untuk mendapatkan rekomendasi warna yang lebih akurat!
+      </div>`;
+  }
+
+  html += `
+    <div class="result-garis" style="margin-top:12px">${"─".repeat(42)}</div>
+    <div class="result-footer">* Catatan: Standar ukuran menggunakan referensi Eropa (EU) &amp; Amerika (US).</div>
+    ${renderTeksturSwatch(material)}`;
+
+  resEl.innerHTML = html;
+  resEl.classList.add("show");
+  resEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function resetForm() {
+  document.getElementById("barang").value = "Baju";
+  document.getElementById("gender").value = "Pria";
+  document.getElementById("tinggi").value = "";
+  document.getElementById("berat").value = "";
+  document.getElementById("lingkar").value = "";
+  document.getElementById("kaki").value = "";
+  updateMaterial();
+  updateInputs();
+  selectedSkin = "";
+  selectedUndertone = "";
+  document.querySelectorAll(".skin-btn").forEach(b => b.classList.remove("selected"));
+  document.querySelectorAll(".undertone-btn").forEach(b => b.classList.remove("selected"));
+  document.getElementById("undertone-hint").textContent = "";
+  document.getElementById("input-undertone").style.display = "none";
+  document.getElementById("error-msg").classList.remove("show");
+  const resEl = document.getElementById("result-box");
+  resEl.innerHTML = "";
+  resEl.classList.remove("show");
+  updateMaterial();
+}
+
+updateMaterial();
+
+// ── TAB SWITCHER ─────────────────────────────────────────────────────────────
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── PANDUAN ACCORDION ───────────────────────────────────────────────────────
+function toggleAcc(headerBtn) {
+  const item = headerBtn.closest('.acc-item');
+  item.classList.toggle('open');
+}
+
+// ── OUTFIT DATA ───────────────────────────────────────────────────────────────
+let selectedStyle = "klasik";
+
+function selectStyle(val, el) {
+  selectedStyle = val;
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+const outfitData = {
+  pantai: {
+    Pria: {
+      klasik: {
+        vibe: "Santai & bersih — tampilan pantai yang timeless dan tidak pernah salah.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Oblong",        detail:"Katun Combed", warna:"Putih",       hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Pendek Cargo", detail:"Katun",        warna:"Krem / Khaki",hex:"#C3B091", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sandal Jepit",        detail:"Karet",        warna:"Coklat",      hex:"#795548", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket",         detail:"Katun",        warna:"Putih",       hex:"#F5F5F5", optional:true  }
+        ]
+      },
+      trendi: {
+        vibe: "Beach vibes yang stylish — cocok untuk foto-foto di tepi pantai.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Hawaiian Shirt",      detail:"Rayon / Linen",warna:"Biru Motif",  hex:"#5B9BD5", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Pendek Swimwear",detail:"Polyester",  warna:"Putih",       hex:"#F8F8F8", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Slip-on Kanvas",       detail:"Kanvas",      warna:"Navy",        hex:"#1B3A6B", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Jerami Lebar",    detail:"Jerami",      warna:"Natural",     hex:"#D4A857", optional:true  }
+        ]
+      },
+      minimalis: {
+        vibe: "Monokrom clean — simpel tapi tetap terlihat intentional dan rapi.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Polos",           detail:"Bambu / Katun",warna:"Abu Muda",   hex:"#9E9E9E", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Pendek Polos",   detail:"Katun",       warna:"Abu Gelap",  hex:"#555555", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sandal Slides",         detail:"Karet",       warna:"Hitam",      hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Baseball Polos",   detail:"Katun",       warna:"Abu Muda",   hex:"#9E9E9E", optional:true  }
+        ]
+      }
+    },
+    Wanita: {
+      klasik: {
+        vibe: "Feminin & segar — tampilan pantai klasik yang selalu cocok di segala suasana.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Blouse Tipis",         detail:"Rayon / Linen",warna:"Putih",      hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Pendek Denim",   detail:"Denim",       warna:"Biru Muda",  hex:"#AED6F1", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sandal Flat",           detail:"Kulit / Karet",warna:"Krem",      hex:"#FAF0E6", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Jerami",           detail:"Jerami",      warna:"Natural",    hex:"#D4A857", optional:true  }
+        ]
+      },
+      trendi: {
+        vibe: "Resort wear modern — tampilan yang cocok dari pantai sampai kafe tepi laut.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Crop Top Rajut",       detail:"Rajutan",     warna:"Coral",      hex:"#FF6F61", optional:false },
+          { icon:"👖", label:"Celana", nama:"Rok Mini Flowy",        detail:"Rayon",       warna:"Putih",      hex:"#F8F8F8", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sandal Tali",           detail:"Kulit Sintetis",warna:"Emas",     hex:"#DAA520", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Warna",     detail:"Katun",       warna:"Kuning",     hex:"#FFD700", optional:true  }
+        ]
+      },
+      minimalis: {
+        vibe: "Monokrom lembut — elegan dan effortless, tetap terlihat stylish tanpa banyak aksesori.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Tank Top Polos",        detail:"Bambu / Katun",warna:"Krem",      hex:"#FAF0E6", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Kulot Ringan",    detail:"Linen",       warna:"Krem Tua",  hex:"#D4C5A9", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sandal Minimalis",       detail:"Karet",       warna:"Krem",      hex:"#FAF0E6", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Polos",      detail:"Linen",       warna:"Krem",      hex:"#FAF0E6", optional:true  }
+        ]
+      }
+    }
+  },
+  olahraga: {
+    Pria: {
+      klasik: {
+        vibe: "Fungsional & nyaman — outfit olahraga yang proven cocok untuk berbagai aktivitas.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Olahraga Dri-fit", detail:"Polyester",   warna:"Putih",      hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Pendek Training", detail:"Polyester",   warna:"Hitam",      hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Running",         detail:"Mesh",        warna:"Putih",      hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Running",           detail:"Polyester",   warna:"Hitam",      hex:"#1a1a1a", optional:true  }
+        ]
+      },
+      trendi: {
+        vibe: "Athleisure — tampilan sporty yang tetap kece dari gym sampai ngopi.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Oversized",         detail:"Katun Carded",warna:"Abu Gelap",  hex:"#555555", optional:false },
+          { icon:"👖", label:"Celana", nama:"Jogger Slim",             detail:"Spandex Blend",warna:"Navy",     hex:"#1B3A6B", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sneakers Chunky",         detail:"Mesh / Kanvas",warna:"Putih",    hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Snapback",           detail:"Katun",       warna:"Navy",      hex:"#1B3A6B", optional:true  }
+        ]
+      },
+      minimalis: {
+        vibe: "All-black atau monokrom — simpel, sleek, dan tetap serius di gym.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Tanktop Compression",    detail:"Spandex Blend",warna:"Hitam",    hex:"#1a1a1a", optional:false },
+          { icon:"👖", label:"Celana", nama:"Legging Pendek",          detail:"Spandex Blend",warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Training",         detail:"Mesh",         warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Polos",              detail:"Polyester",    warna:"Hitam",   hex:"#1a1a1a", optional:true  }
+        ]
+      }
+    },
+    Wanita: {
+      klasik: {
+        vibe: "Sporty & fungsional — nyaman bergerak bebas tanpa mengorbankan penampilan.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Sports Bra + Kaos Tipis",detail:"Spandex Blend",warna:"Putih",   hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Legging Full",            detail:"Spandex Blend",warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Running",          detail:"Mesh",         warna:"Putih",   hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Running",            detail:"Polyester",    warna:"Putih",   hex:"#F8F8F8", optional:true  }
+        ]
+      },
+      trendi: {
+        vibe: "Athleisure feminin — dari kelas yoga langsung bisa brunch tanpa ganti baju.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Crop Top Olahraga",       detail:"Nylon Blend",  warna:"Lilac",   hex:"#C8A2C8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Biker Shorts",             detail:"Spandex Blend",warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sneakers Fashion",         detail:"Kanvas / Mesh",warna:"Putih",   hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Pastel",       detail:"Katun",        warna:"Lilac",   hex:"#C8A2C8", optional:true  }
+        ]
+      },
+      minimalis: {
+        vibe: "Clean & fokus — tampilan gym yang tidak ribet tapi tetap on-point.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Crop Polos",          detail:"Bambu / Katun",warna:"Abu Muda",hex:"#9E9E9E", optional:false },
+          { icon:"👖", label:"Celana", nama:"Legging Seamless",          detail:"Spandex Blend",warna:"Abu Gelap",hex:"#555555",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Training Minimalis", detail:"Mesh",         warna:"Abu",    hex:"#9E9E9E", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Visor",                detail:"Polyester",    warna:"Putih",  hex:"#F8F8F8", optional:true  }
+        ]
+      }
+    }
+  },
+  formal: {
+    Pria: {
+      klasik: {
+        vibe: "Profesional & berwibawa — tampilan kantor klasik yang selalu aman dan dipercaya.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Lengan Panjang",   detail:"Katun Primisima",warna:"Putih",  hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Bahan Formal",      detail:"Polyester Wool",warna:"Abu Gelap",hex:"#555555",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Pantofel Oxford",          detail:"Kulit",          warna:"Hitam",  hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Topi tidak umum untuk formal", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      trendi: {
+        vibe: "Smart casual modern — terlihat profesional namun lebih ekspresif dan tidak kaku.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Motif Halus",      detail:"Linen / Katun",warna:"Biru Muda",hex:"#AED6F1", optional:false },
+          { icon:"👖", label:"Celana", nama:"Chino Slim",               detail:"Katun",        warna:"Navy",    hex:"#1B3A6B", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Derby / Loafer",           detail:"Kulit / Suede",warna:"Coklat",  hex:"#795548", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Topi tidak umum untuk formal", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      minimalis: {
+        vibe: "Monokrom elegan — tampilan formal yang bersih, modern, dan berkesan.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Polos",             detail:"Katun Primisima",warna:"Abu Muda",hex:"#9E9E9E",optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Formal Slim",       detail:"Wool Blend",   warna:"Abu Tua", hex:"#555555", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Pantofel Minimalis",       detail:"Kulit",         warna:"Hitam",  hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Topi tidak umum untuk formal", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      }
+    },
+    Wanita: {
+      klasik: {
+        vibe: "Profesional & elegan — tampilan kantor yang percaya diri dan memiliki otoritas.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Blouse Formal",            detail:"Katun Primisima",warna:"Putih", hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Formal / Rok Pensil",detail:"Polyester",    warna:"Hitam", hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Heels / Flat Formal",      detail:"Kulit",          warna:"Hitam", hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Topi tidak umum untuk formal", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      trendi: {
+        vibe: "Power dressing modern — tampilan kantor yang stylish dan penuh karakter.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Blazer Terstruktur",       detail:"Wool Blend",   warna:"Krem / Camel",hex:"#C19A6B",optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Palazzo",           detail:"Rayon",         warna:"Putih",  hex:"#F8F8F8", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Mules / Pointed Flat",     detail:"Kulit Sintetis",warna:"Krem",   hex:"#FAF0E6", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Topi tidak umum untuk formal", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      minimalis: {
+        vibe: "Tonal dressing — satu warna dari atas ke bawah, kesan elegan yang kuat.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Polos",             detail:"Satin / Katun",warna:"Navy",   hex:"#1B3A6B", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Formal Polos",      detail:"Polyester",    warna:"Navy",   hex:"#1B3A6B", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Loafer / Flat",            detail:"Kulit",         warna:"Hitam", hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Topi tidak umum untuk formal", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      }
+    }
+  },
+  kondangan: {
+    Pria: {
+      klasik: {
+        vibe: "Rapi & sopan — tampilan kondangan yang aman, nyaman, dan tidak berlebihan.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Batik / Polos",    detail:"Katun Primisima",warna:"Biru Tua",hex:"#1B3A6B",optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Bahan",             detail:"Polyester",    warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Pantofel / Loafer",        detail:"Kulit",         warna:"Hitam",  hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Tidak disarankan untuk kondangan", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      trendi: {
+        vibe: "Festive & stylish — tampilan kondangan yang menonjol namun tetap dalam batas kesopanan.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Satin / Velvet",   detail:"Satin",        warna:"Burgundy",hex:"#800020", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Slim Formal",       detail:"Wool Blend",   warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Chelsea Boots / Derby",    detail:"Kulit",         warna:"Coklat", hex:"#795548", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Tidak disarankan untuk kondangan", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      minimalis: {
+        vibe: "Elegan sederhana — tampilan kondangan yang bersih tanpa aksesori berlebih.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kemeja Polos",             detail:"Katun Primisima",warna:"Putih", hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Abu / Navy",        detail:"Wool Blend",   warna:"Abu Gelap",hex:"#555555",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Pantofel Minimalis",       detail:"Kulit",         warna:"Hitam",  hex:"#1a1a1a", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Tidak disarankan untuk kondangan", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      }
+    },
+    Wanita: {
+      klasik: {
+        vibe: "Anggun & feminin — tampilan kondangan yang sopan dan membuat percaya diri.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kebaya / Dress Midi",      detail:"Satin / Brokat",warna:"Dusty Rose",hex:"#D4A5A5",optional:false },
+          { icon:"👖", label:"Celana", nama:"Rok A-line / Kain",        detail:"Satin",         warna:"Senada",  hex:"#E8B4B8", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Heels Strappy",            detail:"Kulit Sintetis",warna:"Nude",    hex:"#D4956A", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Tidak umum untuk kondangan", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      trendi: {
+        vibe: "Contemporary festive — modern dan berani namun tetap layak untuk acara pernikahan.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Dress Wrap / Jumpsuit",    detail:"Satin / Rayon",warna:"Emerald", hex:"#2E8B57", optional:false },
+          { icon:"👖", label:"Celana", nama:"(terusan / one-piece)",     detail:"—",            warna:"—",       hex:"#2E8B57", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Heels Block / Mules",       detail:"Kulit Sintetis",warna:"Emas",   hex:"#DAA520", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Tidak umum untuk kondangan", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      },
+      minimalis: {
+        vibe: "Monokrom chic — tampil elegan dengan satu palet warna yang bersih.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Dress Polos / Blouse",     detail:"Satin",        warna:"Putih Gading",hex:"#FAF0E6",optional:false },
+          { icon:"👖", label:"Celana", nama:"Rok Panjang Polos",        detail:"Satin / Rayon",warna:"Putih Gading",hex:"#FAF0E6",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Heels Minimalis",          detail:"Kulit",         warna:"Nude",    hex:"#D4956A", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"—",                        detail:"Tidak umum untuk kondangan", warna:"", hex:"", optional:true, noTopi:true }
+        ]
+      }
+    }
+  },
+  kasual: {
+    Pria: {
+      klasik: {
+        vibe: "Kasual yang rapi — tampilan harian yang nyaman namun tetap terlihat groomed.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Polo",               detail:"Katun Combed", warna:"Putih",     hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Chino Panjang",            detail:"Katun",        warna:"Krem / Tan",hex:"#C19A6B", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sneakers Putih",           detail:"Kanvas / Mesh",warna:"Putih",    hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Baseball",            detail:"Katun",        warna:"Navy",     hex:"#1B3A6B", optional:true  }
+        ]
+      },
+      trendi: {
+        vibe: "Streetwear casual — stylish dan relevan untuk tampilan anak muda kekinian.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Grafis Oversized",   detail:"Katun Carded", warna:"Hitam",    hex:"#1a1a1a", optional:false },
+          { icon:"👖", label:"Celana", nama:"Cargo Pants",              detail:"Katun",        warna:"Olive",    hex:"#6B7A2A", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"High-top Sneakers",        detail:"Kanvas",       warna:"Putih",    hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Beanie / Bucket",     detail:"Wool / Katun", warna:"Hitam",   hex:"#1a1a1a", optional:true  }
+        ]
+      },
+      minimalis: {
+        vibe: "Less is more — tampilan sehari-hari yang clean dan mudah dipadupadankan.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Polos",               detail:"Bambu / Katun",warna:"Abu Muda", hex:"#9E9E9E", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Slim Polos",         detail:"Katun",        warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sneakers Minimalis",        detail:"Kanvas",       warna:"Putih",   hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Polos",                detail:"Katun",        warna:"Abu",     hex:"#9E9E9E", optional:true  }
+        ]
+      }
+    },
+    Wanita: {
+      klasik: {
+        vibe: "Kasual rapi — tampilan harian yang nyaman, simpel, dan selalu enak dilihat.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Polos / Blouse",     detail:"Katun Combed", warna:"Putih",    hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Jeans Straight",           detail:"Denim",        warna:"Biru",     hex:"#5B9BD5", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sneakers Putih",           detail:"Kanvas",       warna:"Putih",    hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Baseball",            detail:"Katun",        warna:"Putih",    hex:"#F8F8F8", optional:true  }
+        ]
+      },
+      trendi: {
+        vibe: "OOTD ready — tampilan yang foto-genic dan trendi untuk aktivitas harian.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Crop Top / Kemeja Oversized",detail:"Katun / Linen",warna:"Sage Green",hex:"#8FAE8B",optional:false },
+          { icon:"👖", label:"Celana", nama:"Wide Leg Jeans / Rok Mini", detail:"Denim / Katun",warna:"Krem",    hex:"#FAF0E6", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Platform Sneakers / Boots", detail:"Kanvas / Kulit",warna:"Putih", hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Warna",          detail:"Katun",       warna:"Sage Green",hex:"#8FAE8B",optional:true }
+        ]
+      },
+      minimalis: {
+        vibe: "Clean girl aesthetic — tampilan kasual yang bersih dan teratur tanpa effort berlebih.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Tank Top / Kaos Polos",   detail:"Bambu / Katun",warna:"Putih",    hex:"#F8F8F8", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Linen Polos",       detail:"Linen",        warna:"Krem",     hex:"#FAF0E6", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Flat Mules / Sneakers",    detail:"Kulit / Kanvas",warna:"Putih",  hex:"#F8F8F8", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Polos",         detail:"Linen",        warna:"Krem",   hex:"#FAF0E6", optional:true  }
+        ]
+      }
+    }
+  },
+  outdoor: {
+    Pria: {
+      klasik: {
+        vibe: "Fungsional & tangguh — outfit hiking yang proven nyaman dan tahan berbagai kondisi.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Dri-fit Lengan Panjang",detail:"Polyester",  warna:"Abu / Olive",hex:"#6B7A2A",optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Cargo / Trekking",   detail:"Katun / Nylon",warna:"Coklat Tua",hex:"#5C3317",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Hiking / Boot",       detail:"Kulit / Karet",warna:"Coklat",   hex:"#795548", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Lebar / Bucket",        detail:"Katun / Polyester",warna:"Olive",hex:"#6B7A2A",optional:false }
+        ]
+      },
+      trendi: {
+        vibe: "Gorpcore aesthetic — outdoor style yang sedang tren dan tetap fungsional.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Fleece / Jacket Outdoor",  detail:"Polyester",    warna:"Oranye",   hex:"#FF6600", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Cargo Slim",         detail:"Nylon Blend",  warna:"Hitam",    hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Trail Running Shoes",        detail:"Mesh / Karet", warna:"Hitam-Oranye",hex:"#FF6600",optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Trucker / 5-panel",    detail:"Polyester",    warna:"Hitam",    hex:"#1a1a1a", optional:false }
+        ]
+      },
+      minimalis: {
+        vibe: "Simpel & efisien — tampilan outdoor yang tidak ribet namun semua fungsinya terpenuhi.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Polos Lengan Panjang",detail:"Bambu / Katun",warna:"Abu Gelap",hex:"#555555", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Panjang Ringan",     detail:"Nylon Blend",  warna:"Abu / Hitam",hex:"#555555",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Hiking Minimalis",   detail:"Karet / Mesh", warna:"Abu",      hex:"#9E9E9E", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Baseball Polos",        detail:"Polyester",    warna:"Abu",      hex:"#9E9E9E", optional:false }
+        ]
+      }
+    },
+    Wanita: {
+      klasik: {
+        vibe: "Fungsional & nyaman — tampilan outdoor yang aman, praktis, dan tidak repot.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Dri-fit / Kemeja Flannel",detail:"Polyester",warna:"Olive / Hijau",hex:"#6B7A2A",optional:false },
+          { icon:"👖", label:"Celana", nama:"Legging Outdoor / Cargo",   detail:"Spandex Blend",warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Hiking",              detail:"Kulit / Karet",warna:"Coklat",  hex:"#795548", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Lebar",          detail:"Katun",        warna:"Olive",   hex:"#6B7A2A", optional:false }
+        ]
+      },
+      trendi: {
+        vibe: "Gorpcore feminin — outdoor style yang trendi dengan sentuhan warna cerah.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Jacket Windbreaker",        detail:"Nylon Blend",  warna:"Teal",     hex:"#008080", optional:false },
+          { icon:"👖", label:"Celana", nama:"Legging Printed / Cargo",   detail:"Spandex Blend",warna:"Hitam",   hex:"#1a1a1a", optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Trail Shoes / Chunky Boots",detail:"Karet / Mesh", warna:"Putih-Teal",hex:"#008080",optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi 5-panel / Snapback",   detail:"Polyester",    warna:"Teal",     hex:"#008080", optional:false }
+        ]
+      },
+      minimalis: {
+        vibe: "Earth tone clean — tampilan outdoor yang natural dan menyatu dengan alam.",
+        items: [
+          { icon:"👕", label:"Baju",   nama:"Kaos Polos Lengan Panjang",detail:"Bambu / Katun",warna:"Krem",     hex:"#FAF0E6", optional:false },
+          { icon:"👖", label:"Celana", nama:"Celana Trekking Ringan",    detail:"Nylon Blend",  warna:"Coklat Muda",hex:"#A0622A",optional:false },
+          { icon:"👟", label:"Sepatu", nama:"Sepatu Trail Minimalis",    detail:"Karet",         warna:"Coklat",  hex:"#795548", optional:false },
+          { icon:"🧢", label:"Topi",   nama:"Topi Bucket Polos",          detail:"Katun",         warna:"Krem",   hex:"#FAF0E6", optional:false }
+        ]
+      }
+    }
+  }
+};
+
+const situasiLabel = {
+  pantai:"🏖️ Pantai / Liburan", olahraga:"🏃 Olahraga / Gym",
+  formal:"💼 Formal / Kantor", kondangan:"🎉 Kondangan / Semi-formal",
+  kasual:"👕 Kasual Harian", outdoor:"🏕️ Outdoor / Hiking"
+};
+const styleLabel = { klasik:"🎯 Safe / Klasik", trendi:"✨ Trendi / Modern", minimalis:"⬜ Minimalis / Monokrom" };
+
+function tampilkanOutfit() {
+  const gender   = document.getElementById("outfit-gender").value;
+  const situasi  = document.getElementById("outfit-situasi").value;
+  const style    = selectedStyle;
+  const resEl    = document.getElementById("outfit-result");
+
+  const data = outfitData[situasi]?.[gender]?.[style];
+  if (!data) {
+    resEl.innerHTML = '<div class="no-result-msg">Data outfit belum tersedia untuk kombinasi ini.</div>';
+    return;
+  }
+
+  let html = `
+    <div class="outfit-result-title">${situasiLabel[situasi]} · ${gender} · ${styleLabel[style]}</div>
+    <div class="outfit-vibe">
+      <div class="outfit-vibe-label">✨ VIBE</div>
+      ${data.vibe}
+    </div>
+    <hr class="outfit-section-divider">
+    <div class="outfit-grid">`;
+
+  data.items.forEach(item => {
+    if (item.noTopi) {
+      html += `
+        <div class="outfit-item-card optional">
+          <div class="outfit-icon">${item.icon}</div>
+          <div class="outfit-item-body">
+            <div class="outfit-item-label">${item.label} <span class="outfit-optional-tag">Opsional</span></div>
+            <div class="outfit-item-name" style="color:#C4A882;">Tidak diperlukan</div>
+            <div class="outfit-item-detail">${item.detail}</div>
+          </div>
+        </div>`;
+    } else {
+      const optTag = item.optional ? '<span class="outfit-optional-tag">Opsional</span>' : '';
+      const colorDot = item.hex ? `<span class="color-dot" style="background:${item.hex};"></span>` : '';
+      html += `
+        <div class="outfit-item-card ${item.optional ? 'optional' : ''}">
+          <div class="outfit-icon">${item.icon}</div>
+          <div class="outfit-item-body">
+            <div class="outfit-item-label">${item.label} ${optTag}</div>
+            <div class="outfit-item-name">${item.nama}</div>
+            <div class="outfit-item-detail">
+              ${colorDot} ${item.warna} &nbsp;·&nbsp; ${item.detail}
+            </div>
+          </div>
+        </div>`;
+    }
+  });
+
+  html += `</div>`;
+  resEl.innerHTML = html;
+  resEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function resetOutfit() {
+  document.getElementById("outfit-gender").value = "Pria";
+  document.getElementById("outfit-situasi").value = "pantai";
+  selectedStyle = "klasik";
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.style-btn')[0].classList.add('active');
+  document.getElementById("outfit-result").innerHTML = "";
+}
+
+</script>
+</body>
+</html>
